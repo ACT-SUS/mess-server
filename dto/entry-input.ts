@@ -1,6 +1,6 @@
 class EntryInputDTO {
     name: string;
-    id: string;
+    sid: string;
     numberOfGuests?: number;
     extraFood?: number;
 }

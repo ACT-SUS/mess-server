@@ -5,7 +5,7 @@ const entrySchema = new Schema({
         type: String,
         required: true,
     },
-    id: {
+    sid: {
         type: String,
         required: true,
     },

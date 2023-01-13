@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import fs from 'fs';
 
 import { StudentLoginDTO, StudentRegisterDTO } from '../dto';
-import { Student } from '../models';
+import { Entry, Student } from '../models';
 import { s3 } from '../utils';
 
 // Register student
@@ -110,9 +110,30 @@ export const getAllStudents = async (_: Request, res: Response) => {
 
 export const getStudent = async (req: Request, res: Response) => {
     try {
-        const student = await Student.findOne({ sid: req.params.id });
+        const { sid, firstName, lastName, status, balance, expense } =
+            await Student.findOne({
+                sid: req.params.id,
+            });
+        const entries = await Entry.find({ sid: req.params.id });
+
+        let extraFood = 0;
+        let guests = 0;
+
+        entries.map((entry) => {
+            extraFood += entry.extraFood;
+            guests += entry.numberOfGuests;
+        });
         return res.json({
-            student: student,
+            student: {
+                sid,
+                firstName,
+                lastName,
+                status,
+                balance,
+                expense,
+                extraFood,
+                guests,
+            },
         });
     } catch (error) {
         console.error(error);

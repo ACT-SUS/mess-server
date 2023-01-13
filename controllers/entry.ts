@@ -49,7 +49,7 @@ export const entriesToday = async (_req: Request, res: Response) => {
 export const studentEntries = async (req: Request, res: Response) => {
     try {
         const id = req.params.id;
-        const entries = await Entry.find({ id }).sort({
+        const entries = await Entry.find({ sid: id }).sort({
             date: 'desc',
             time: 'desc',
         });
