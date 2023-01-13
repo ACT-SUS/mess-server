@@ -11,6 +11,7 @@ export const createEntry = async (req: Request, res: Response) => {
             date: new Date().toLocaleDateString('en-GB'),
             time: new Date().toLocaleTimeString(),
         });
+        console.log(entry.date);
         await entry.save();
 
         return res.status(201).json({
@@ -28,7 +29,8 @@ export const createEntry = async (req: Request, res: Response) => {
 // Get today's entries
 export const entriesToday = async (_req: Request, res: Response) => {
     try {
-        const date = new Date().toLocaleDateString();
+        const date = new Date().toLocaleDateString('en-GB');
+        console.log(date);
         const entries = await Entry.find({ date });
 
         return res.status(200).json({

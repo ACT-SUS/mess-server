@@ -54,7 +54,7 @@ export const rejectStudent = async (req: Request, res: Response) => {
 };
 
 // Get students with pending status
-export const pendingStudents = async (req: Request, res: Response) => {
+export const pendingStudents = async (_req: Request, res: Response) => {
     try {
         const students = await Student.find({ status: StudentStatus.PENDING });
 
