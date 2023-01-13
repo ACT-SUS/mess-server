@@ -34,8 +34,9 @@ const studentSchema = new Schema({
     },
     fcmToken: {
         type: String,
-        required: true
-    }
+        required: true,
+        default: 'token',
+    },
 });
 
 const Student = model('student', studentSchema);
