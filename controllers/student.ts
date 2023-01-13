@@ -12,6 +12,7 @@ export const register = async (req: Request, res: Response) => {
         const student = new Student(data);
         await student.save();
 
+        console.log(student);
         return res.status(201).json({
             student,
         });
@@ -28,7 +29,6 @@ export const register = async (req: Request, res: Response) => {
 export const login = async (req: Request, res: Response) => {
     try {
         const data: StudentLoginDTO = req.body;
-        console.log(data);
         const student = await Student.findOne({ sid: data.sid });
 
         if (!student) {
@@ -110,7 +110,7 @@ export const getAllStudents = async (_: Request, res: Response) => {
 
 export const getStudent = async (req: Request, res: Response) => {
     try {
-        const student = await Student.findById(req.params.id);
+        const student = await Student.findOne({ sid: req.params.id });
         return res.json({
             student: student,
         });
