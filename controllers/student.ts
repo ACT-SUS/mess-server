@@ -142,3 +142,32 @@ export const getStudent = async (req: Request, res: Response) => {
         });
     }
 };
+
+// Student stats
+export const studentMonthlyStats = async (req: Request, res: Response) => {
+    try {
+        const sid = req.params.sid;
+        const month = new Date().getMonth() + 1;
+        const entries = await Entry.find({ sid });
+        entries.filter(
+            (entry) =>
+                month.toString() ==
+                entry.date?.substring(0, entry.date.indexOf('/'))
+        );
+
+        const totalMeals = entries.length;
+        let guests = 0;
+        let extraFood = 0;
+
+        entries.map((entry) => {
+            guests += entry.numberOfGuests;
+            extraFood += entry.extraFood;
+        });
+        return res.json({ entries, totalMeals, guests, extraFood });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({
+            message: 'Internal Server Error',
+        });
+    }
+};
