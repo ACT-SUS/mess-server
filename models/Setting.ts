@@ -227,7 +227,7 @@ const settingSchema = new Schema({
             },
         },
     },
-    prices: {
+    price: {
         breakfast: {
             type: Number,
             required: true,

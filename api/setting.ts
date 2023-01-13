@@ -1,16 +1,14 @@
 import { Router } from 'express'
-import { getMenu } from '../controllers/setting';
-
+import { getMenu, getPrices, getSemCycle, } from '../controllers/setting';
+import { updatePrices, updateMenu, updateSemCycle } from './../controllers/setting';
 const router = Router()
 
 router.get('/menu', getMenu)
-// router.put('/menu', getMenu)
+router.get('/prices', getPrices)
+router.get('/semCycle', getSemCycle)
 
-// router.get('/price',);
-// router.put('/price',);
-
-
-// router.get('/sem-cycle',)
-// router.put('/sem-cycle',)
+router.put('/menu', updateMenu)
+router.put('/prices', updatePrices)
+router.put('/semCycle', updateSemCycle)
 
 export default router;
