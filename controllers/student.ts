@@ -145,7 +145,7 @@ export const getStudent = async (req: Request, res: Response) => {
 
 export const billGeneration = async (req: Request, res: Response) => {
     try {
-        const student = await Student.find({ sid: req.params.id });
+        const student = await Student.findOne({ sid: req.params.id });
         const entries = await Entry.find({
             sid: req.params.id
         })
@@ -177,8 +177,16 @@ export const billGeneration = async (req: Request, res: Response) => {
             'totalCost': guestCost + extraFoodCost + dailyCost
         }
 
+        console.log(student);
 
-        return res.json(filteredEntries)
+
+        return res.json({
+            name: student.firstName + " " + student.lastName,
+            rollno: student.sid,
+            balance: student.balance,
+            expense: student.expense,
+            allCost: allCost
+        })
     } catch (error) {
         console.error(error);
         return res.status(500).json({
