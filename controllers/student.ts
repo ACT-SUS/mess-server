@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import fs from 'fs';
-import { ObjectId } from 'mongodb'
+import { ObjectId } from 'mongodb';
 import { StudentLoginDTO, StudentRegisterDTO } from '../dto';
 import { Entry, Setting, Student } from '../models';
 import { s3 } from '../utils';
@@ -147,53 +147,60 @@ export const billGeneration = async (req: Request, res: Response) => {
     try {
         const student = await Student.findOne({ sid: req.params.id });
         const entries = await Entry.find({
-            sid: req.params.id
-        })
-        const settings = await Setting.findOne({ _id: new ObjectId(process.env.SETTING_ID) })
+            sid: req.params.id,
+        });
+        const settings = await Setting.findOne({
+            _id: new ObjectId(process.env.SETTING_ID),
+        });
         const filteredEntries = entries.filter((entry) => {
-            return parseInt(entry.date.slice(3, 5)) === parseInt(req.params.month);
-        })
+            return (
+                parseInt(entry.date.slice(3, 5)) === parseInt(req.params.month)
+            );
+        });
         const totalGuest = filteredEntries.reduce((total, entry) => {
-            return total + entry.numberOfGuests
-        }, 0)
-        const guestCost = totalGuest * settings?.price?.vegMeal
+            return total + entry.numberOfGuests;
+        }, 0);
+        const guestCost = totalGuest * settings?.price?.vegMeal;
         const totalExtraFood = filteredEntries.reduce((total, entry) => {
-            return total + entry.extraFood
-        }, 0)
-        const extraFoodCost = totalExtraFood * settings?.price?.nonVegMeal
-        const totalDaysAttend = (new Set(filteredEntries.map(entry => {
-            return { date: entry.date }
-        }))).size
-        const dailyCost = totalDaysAttend * (settings?.price?.breakfast + settings?.price?.vegMeal * 2)
+            return total + entry.extraFood;
+        }, 0);
+        const extraFoodCost = totalExtraFood * settings?.price?.nonVegMeal;
+        const totalDaysAttend = new Set(
+            filteredEntries.map((entry) => {
+                return { date: entry.date };
+            })
+        ).size;
+        const dailyCost =
+            totalDaysAttend *
+            (settings?.price?.breakfast + settings?.price?.vegMeal * 2);
         console.log(totalGuest, totalExtraFood, totalDaysAttend);
         console.log(guestCost, extraFoodCost, dailyCost);
         const allCost = {
-            'totalGuest': totalGuest,
-            'guestCost': guestCost,
-            'totalExtraFood': totalExtraFood,
-            'extraFoodCost': extraFoodCost,
-            'attendance': totalDaysAttend,
-            'dailyCost': dailyCost,
-            'totalCost': guestCost + extraFoodCost + dailyCost
-        }
+            totalGuest: totalGuest,
+            guestCost: guestCost,
+            totalExtraFood: totalExtraFood,
+            extraFoodCost: extraFoodCost,
+            attendance: totalDaysAttend,
+            dailyCost: dailyCost,
+            totalCost: guestCost + extraFoodCost + dailyCost,
+        };
 
         console.log(student);
 
-
         return res.json({
-            name: student.firstName + " " + student.lastName,
+            name: student.firstName + ' ' + student.lastName,
             rollno: student.sid,
             balance: student.balance,
             expense: student.expense,
-            allCost: allCost
-        })
+            allCost: allCost,
+        });
     } catch (error) {
         console.error(error);
         return res.status(500).json({
-            message: "Internal Server Error"
-        })
+            message: 'Internal Server Error',
+        });
     }
-}
+};
 // Student stats
 export const studentMonthlyStats = async (req: Request, res: Response) => {
     try {
@@ -223,3 +230,24 @@ export const studentMonthlyStats = async (req: Request, res: Response) => {
     }
 };
 
+// Update expense
+export const updateExpense = async (req: Request, res: Response) => {
+    try {
+        const sid = req.params.sid;
+        const student = await Student.findOne({ sid });
+        await Student.findOneAndUpdate(
+            { sid },
+            {
+                $set: {
+                    expense: student?.expense + req.body.cost,
+                },
+            }
+        );
+        return res.status(200).json({});
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({
+            message: 'Internal Server Error',
+        });
+    }
+};

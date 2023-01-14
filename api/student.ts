@@ -8,6 +8,7 @@ import {
     login,
     billGeneration,
     studentMonthlyStats,
+    updateExpense,
 } from '../controllers/student';
 
 const router = Router();
@@ -18,7 +19,8 @@ router.post('/login', login);
 router.post('/request-approval', upload.single('file'), requestApproval);
 router.get('/', getAllStudents);
 router.get('/:id', getStudent);
-router.get('/bill/:id/:month', billGeneration)
+router.get('/bill/:id/:month', billGeneration);
 router.get('/monthly-stats/:sid', studentMonthlyStats);
+router.put('/update-expense/:sid', updateExpense);
 
 export default router;

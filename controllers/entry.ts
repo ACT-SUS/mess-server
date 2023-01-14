@@ -1,6 +1,6 @@
 import { EntryInputDTO, NonvegEntryDTO } from 'dto';
 import { Request, Response } from 'express';
-import { Entry, NonVeg } from '../models';
+import { Entry, NonVeg, Student } from '../models';
 
 // Create entry
 export const createEntry = async (req: Request, res: Response) => {
@@ -11,8 +11,31 @@ export const createEntry = async (req: Request, res: Response) => {
             date: new Date().toLocaleDateString('en-GB'),
             time: new Date().toLocaleTimeString(),
         });
+
         console.log(entry.date);
         await entry.save();
+
+        const student = await Student.findOne({ sid: data.sid });
+        if (student) {
+            await Student.findOneAndUpdate(
+                { sid: data.sid },
+                {
+                    $set: {
+                        expense:
+                            student?.expense +
+                            70 +
+                            70 *
+                                (data.numberOfGuests === undefined
+                                    ? 0
+                                    : data.numberOfGuests) +
+                            90 *
+                                (data.extraFood === undefined
+                                    ? 0
+                                    : data.extraFood),
+                    },
+                }
+            );
+        }
 
         return res.status(201).json({
             entry,
