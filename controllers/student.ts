@@ -1,8 +1,8 @@
 import { Request, Response } from 'express';
 import fs from 'fs';
-
+import { ObjectId } from 'mongodb'
 import { StudentLoginDTO, StudentRegisterDTO } from '../dto';
-import { Entry, Student } from '../models';
+import { Entry, Setting, Student } from '../models';
 import { s3 } from '../utils';
 
 // Register student
@@ -142,3 +142,47 @@ export const getStudent = async (req: Request, res: Response) => {
         });
     }
 };
+
+export const billGeneration = async (req: Request, res: Response) => {
+    try {
+        const student = await Student.find({ sid: req.params.id });
+        const entries = await Entry.find({
+            sid: req.params.id
+        })
+        const settings = await Setting.findOne({ _id: new ObjectId(process.env.SETTING_ID) })
+        const filteredEntries = entries.filter((entry) => {
+            return parseInt(entry.date.slice(3, 5)) === parseInt(req.params.month);
+        })
+        const totalGuest = filteredEntries.reduce((total, entry) => {
+            return total + entry.numberOfGuests
+        }, 0)
+        const guestCost = totalGuest * settings?.price?.vegMeal
+        const totalExtraFood = filteredEntries.reduce((total, entry) => {
+            return total + entry.extraFood
+        }, 0)
+        const extraFoodCost = totalExtraFood * settings?.price?.nonVegMeal
+        const totalDaysAttend = (new Set(filteredEntries.map(entry => {
+            return { date: entry.date }
+        }))).size
+        const dailyCost = totalDaysAttend * (settings?.price?.breakfast + settings?.price?.vegMeal * 2)
+        console.log(totalGuest, totalExtraFood, totalDaysAttend);
+        console.log(guestCost, extraFoodCost, dailyCost);
+        const allCost = {
+            'totalGuest': totalGuest,
+            'guestCost': guestCost,
+            'totalExtraFood': totalExtraFood,
+            'extraFoodCost': extraFoodCost,
+            'attendance': totalDaysAttend,
+            'dailyCost': dailyCost,
+            'totalCost': guestCost + extraFoodCost + dailyCost
+        }
+
+
+        return res.json(filteredEntries)
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({
+            message: "Internal Server Error"
+        })
+    }
+}
