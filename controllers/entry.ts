@@ -1,6 +1,6 @@
-import { EntryInputDTO } from 'dto';
+import { EntryInputDTO, NonvegEntryDTO } from 'dto';
 import { Request, Response } from 'express';
-import { Entry } from '../models';
+import { Entry, NonVeg } from '../models';
 
 // Create entry
 export const createEntry = async (req: Request, res: Response) => {
@@ -57,6 +57,42 @@ export const studentEntries = async (req: Request, res: Response) => {
         return res.status(200).json({
             entries,
         });
+    } catch (error) {
+        console.error(error);
+
+        return res.status(500).json({
+            message: 'Internal server error',
+        });
+    }
+};
+
+// Want non-veg on Friday
+export const nonvegEntry = async (req: Request, res: Response) => {
+    try {
+        const data: NonvegEntryDTO = req.body;
+        const entry = new NonVeg(data);
+
+        await entry.save();
+
+        return res.status(201).json({
+            entry,
+        });
+    } catch (error) {
+        console.error(error);
+
+        return res.status(500).json({
+            message: 'Internal server error',
+        });
+    }
+};
+
+// Number of non-veg entries of a student
+export const studentNonvegEntries = async (req: Request, res: Response) => {
+    try {
+        const sid = req.params.sid;
+        const entries = await NonVeg.find({ sid });
+
+        return res.status(200).json(entries);
     } catch (error) {
         console.error(error);
 
